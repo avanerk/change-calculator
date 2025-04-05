@@ -2,6 +2,7 @@ import { useState, FormEvent } from "react";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { Card, CardContent } from "./components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function App() {
   const [amount, setAmount] = useState<string>("");
@@ -9,6 +10,11 @@ export default function App() {
   const [result, setResult] = useState<Record<string, number> | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  const formatCurrency = (cents: string) => {
+    const value = (parseInt(cents) / 100).toFixed(2);
+    return `€ ${value.replace(".", ",")}`;
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,7 +113,7 @@ export default function App() {
                 <ul className="text-sm space-y-1">
                   {Object.entries(result).map(([key, value]) => (
                     <li key={key} className="flex justify-between">
-                      <span>{key}</span>
+                      <span>{formatCurrency(key)}</span>
                       <span>{value} stuks</span>
                     </li>
                   ))}
