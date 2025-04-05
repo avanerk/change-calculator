@@ -1,5 +1,11 @@
 package nl.arendvanerk.changecalculator.model;
 
-public class ChangeRequest {
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
+public class ChangeRequest {
+    private int amount;
+    private int paid;
 }

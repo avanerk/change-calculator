@@ -1,8 +1,11 @@
 package nl.arendvanerk.changecalculator.service;
 
+import org.springframework.stereotype.Service;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Service
 public class ChangeCalculator {
 
     private final int[] denominations = {
