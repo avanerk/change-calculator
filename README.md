@@ -1,51 +1,56 @@
+# Omoda Wisselgeld Calculator
 
-# Omoda wisselgeld calculator
+Een full-stack applicatie in React + Spring Boot waarmee wisselgeld berekend wordt op basis van een aankoopbedrag en contante betaling.
 
-### De applicatie lokaal draaien in docker
+---
 
-Zorg dat je Docker en Docker Compose hebt geïnstalleerd.
+## Applicatie lokaal draaien met Docker
+
+Zorg dat Docker en Docker Compose zijn geïnstalleerd.
 
 ```bash
 docker compose up --build
 ```
 
-Frontend draait op: http://localhost:3000
+- Frontend: http://localhost:3000  
+- Backend: http://localhost:8000
 
-Backend draait op: http://localhost:8000
+---
 
 ## Development
 
-### Backend
-
-#### Vereisten
+### Vereisten
 
 - Java 17 of 21 (getest met JDK 17)
-- Maven 3.8+
+- Maven 3.8+ of `./mvnw` (Maven wrapper)
 - Node.js 18+
 - npm 9+
 
+---
 
-#### Backend starten (Spring Boot)
-
-(Indien maven niet is geinstalleerd op je machine kun je ook de maven wrapper gebruiken in het project. Vervang `mvn` door `./mvnw`)
+### Backend starten (Spring Boot)
 
 ```bash
 cd backend
-mvn clean install
-mvn spring-boot:run
+mvn clean install     # of ./mvnw clean install
+mvn spring-boot:run   # of ./mvnw spring-boot:run
 ```
 
-De backend draait op: http://localhost:8000
+Server draait op: http://localhost:8000
 
-#### Tests draaien
+---
 
-Het project beschikt over tests geschreven met behulp van junit. Voer de tests als volgt uit:
+### Backend tests draaien
 
 ```bash
-mvn test
+mvn test   # of ./mvnw test
 ```
 
-### Frontend
+De tests zijn geschreven met JUnit 5 en testen onder andere de `ChangeCalculator`.
+
+---
+
+### Frontend starten (React)
 
 ```bash
 cd frontend
@@ -53,8 +58,31 @@ npm install
 npm start
 ```
 
-Zorg dat in frontend/.env staat:
+Zorg dat je `.env` bestand in `frontend/` de volgende regel bevat:
 
-```bash
+```env
 REACT_APP_API_URL=http://localhost:8000
+```
+
+---
+
+## API-endpoint
+
+```
+POST /api/v1/change
+Content-Type: application/json
+
+{
+  "amount": 4575,
+  "paid": 5000
+}
+```
+
+**Response:**
+
+```json
+{
+  "200": 2,
+  "25": 1
+}
 ```
