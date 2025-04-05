@@ -1,23 +1,30 @@
 package nl.arendvanerk.changecalculator.service;
 
+import nl.arendvanerk.changecalculator.model.CurrencyInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ChangeCalculator {
 
-    private final int[] denominations = {
-            5000, 2000, 1000, 500, 200, 100, 50, 25, 20, 10, 5
-    };
+    private final CurrencyConfigFactory factory;
 
-    public Map<Integer, Integer> calculateChange(int amount, int paid) {
-        int change = paid - amount;
+    public ChangeCalculator(CurrencyConfigFactory factory) {
+        this.factory = factory;
+    }
 
-        if (change < 0) {
-            throw new IllegalArgumentException("The paid amount should be greater than the product amount");
+    public Map<Integer, Integer> calculateChange(int amount, int paid, String currency) {
+        if (paid < amount) {
+            throw new IllegalArgumentException("Betaald bedrag moet groter of gelijk zijn aan het aankoopbedrag.");
         }
+
+        CurrencyConfig config = factory.getConfig(currency);
+        int[] denominations = config.getDenominations();
+        int change = paid - amount;
 
         Map<Integer, Integer> result = new LinkedHashMap<>();
 
@@ -32,4 +39,9 @@ public class ChangeCalculator {
         return result;
     }
 
+    public List<CurrencyInfo> getSupportedCurrencyInfo() {
+        return factory.getAllConfigs().stream()
+                .map(cfg -> new CurrencyInfo(cfg.getCode(), cfg.getSymbol()))
+                .collect(Collectors.toList());
+    }
 }

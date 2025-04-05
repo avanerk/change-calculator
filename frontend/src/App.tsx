@@ -1,19 +1,46 @@
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { Card, CardContent } from "./components/ui/card";
 import { cn } from "@/lib/utils";
 
+interface CurrencyInfo {
+  code: string;
+  symbol: string;
+}
+
 export default function App() {
   const [amount, setAmount] = useState<string>("");
   const [paid, setPaid] = useState<string>("");
+  const [currency, setCurrency] = useState<string>("EUR");
+  const [currencies, setCurrencies] = useState<CurrencyInfo[]>([]);
+  const [symbol, setSymbol] = useState<string>("€");
   const [result, setResult] = useState<Record<string, number> | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
+  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
+  useEffect(() => {
+    fetch(`${apiUrl}/api/v1/currencies/info`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCurrencies(data);
+        const selected = data.find((c: CurrencyInfo) => c.code === currency);
+        if (selected) setSymbol(selected.symbol);
+      });
+  }, []);
+
+  useEffect(() => {
+    const selected = currencies.find((c) => c.code === currency);
+    if (selected) {
+      setSymbol(selected.symbol);
+    }
+  }, [currency, currencies]);
+
   const formatCurrency = (cents: string) => {
     const value = (parseInt(cents) / 100).toFixed(2);
-    return `€ ${value.replace(".", ",")}`;
+    return `${symbol} ${value.replace(".", ",")}`;
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -34,14 +61,11 @@ export default function App() {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || "http://localhost:8000"}/api/v1/change`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: amountCents, paid: paidCents }),
-        }
-      );
+      const response = await fetch(`${apiUrl}/api/v1/change`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amountCents, paid: paidCents, currency }),
+      });
 
       if (!response.ok) {
         throw new Error("Fout bij ophalen van wisselgeld.");
@@ -72,7 +96,19 @@ export default function App() {
           <Card className="p-6 bg-white shadow-md">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Aankoopbedrag (€)</label>
+                <label className="block text-sm font-medium mb-1">Valuta</label>
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="w-full p-2 border rounded-md shadow-sm bg-white"
+                >
+                  {currencies.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Aankoopbedrag ({symbol})</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -83,7 +119,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Betaald bedrag (€)</label>
+                <label className="block text-sm font-medium mb-1">Betaald bedrag ({symbol})</label>
                 <Input
                   type="number"
                   step="0.01"

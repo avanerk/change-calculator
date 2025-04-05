@@ -8,4 +8,5 @@ import lombok.Setter;
 public class ChangeRequest {
     private int amount;
     private int paid;
+    private String currency;
 }
