@@ -2,6 +2,9 @@
 
 Een full-stack applicatie in React + Spring Boot waarmee wisselgeld berekend wordt op basis van een aankoopbedrag en contante betaling.
 
+
+![Wisselgeld Calculator Screenshot](screenshot.png)
+
 ---
 
 ## Applicatie lokaal draaien met Docker
