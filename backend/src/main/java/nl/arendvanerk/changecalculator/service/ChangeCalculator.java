@@ -1,6 +1,8 @@
 package nl.arendvanerk.changecalculator.service;
 
 import nl.arendvanerk.changecalculator.model.CurrencyInfo;
+import nl.arendvanerk.changecalculator.rounding.RoundingStrategy;
+import nl.arendvanerk.changecalculator.rounding.RoundingStrategyFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -12,22 +14,26 @@ import java.util.stream.Collectors;
 public class ChangeCalculator {
 
     private final CurrencyConfigFactory factory;
+    private final RoundingStrategyFactory roundingFactory;
 
-    public ChangeCalculator(CurrencyConfigFactory factory) {
+    public ChangeCalculator(CurrencyConfigFactory factory, RoundingStrategyFactory roundingFactory) {
         this.factory = factory;
+        this.roundingFactory = roundingFactory;
     }
 
     public Map<Integer, Integer> calculateChange(int amount, int paid, String currency) {
-        if (paid < amount) {
+        RoundingStrategy roundingStrategy = roundingFactory.getStrategy(currency);
+        int roundedAmount = roundingStrategy.round(amount);
+
+        if (paid < roundedAmount) {
             throw new IllegalArgumentException("Betaald bedrag moet groter of gelijk zijn aan het aankoopbedrag.");
         }
 
         CurrencyConfig config = factory.getConfig(currency);
         int[] denominations = config.getDenominations();
-        int change = paid - amount;
+        int change = paid - roundedAmount;
 
         Map<Integer, Integer> result = new LinkedHashMap<>();
-
         for (int denomination : denominations) {
             int times = change / denomination;
             if (times > 0) {

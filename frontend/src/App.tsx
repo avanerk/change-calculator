@@ -55,10 +55,6 @@ export default function App() {
       return setError("Beide velden moeten geldige getallen zijn.");
     }
 
-    if (paidCents < amountCents) {
-      return setError("Het betaalde bedrag is te laag.");
-    }
-
     setLoading(true);
     try {
       const response = await fetch(`${apiUrl}/api/v1/change`, {
@@ -68,7 +64,8 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error("Fout bij ophalen van wisselgeld.");
+        const errorText = await response.text();
+        return setError(errorText || "Fout bij ophalen van wisselgeld.");
       }
 
       const data: Record<string, number> = await response.json();
@@ -146,14 +143,18 @@ export default function App() {
             <Card className="p-6 bg-white shadow-md">
               <CardContent className="space-y-2">
                 <h2 className="text-lg font-semibold">Wisselgeld</h2>
-                <ul className="text-sm space-y-1">
-                  {Object.entries(result).map(([key, value]) => (
-                    <li key={key} className="flex justify-between">
-                      <span>{formatCurrency(key)}</span>
-                      <span>{value} stuks</span>
-                    </li>
-                  ))}
-                </ul>
+                {Object.keys(result).length === 0 ? (
+                  <p className="text-sm text-gray-600">Je hoeft geen wisselgeld terug te geven.</p>
+                ) : (
+                  <ul className="text-sm space-y-1">
+                    {Object.entries(result).map(([key, value]) => (
+                      <li key={key} className="flex justify-between">
+                        <span>{formatCurrency(key)}</span>
+                        <span>{value} stuks</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           )}
